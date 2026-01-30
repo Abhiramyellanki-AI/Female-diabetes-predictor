@@ -1,0 +1,94 @@
+#importing libraries
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn import svm
+from sklearn.metrics import accuracy_score
+#this is the data collection part
+#the pima data sets from the uci repository
+diabetes_data = pd.read_csv("C:/Users/Abhiram/Downloads/diabetes.csv")#initialising the dataset
+#printing the first 5 rows of the data set
+a = diabetes_data.head()#it gives the top 5 rows of our data set
+print(a)
+b=diabetes_data.shape#this wil give us the size of data sets like how many columns and rows we have
+print(b)
+c=diabetes_data.describe()#it will give you the statistical data like mean,standard deviation and various other values
+print(c)
+d=diabetes_data['Outcome'].value_counts()
+print(d)
+#there are 1316 non diabetic people and 684 people which are diabetic
+#0-->non diabetic
+#1-->diabetic
+e=diabetes_data.groupby('Outcome').mean()
+print(e)
+#seperating data and labels
+f=diabetes_data.drop('Outcome',axis=1)#we are going to drop the column which is outcome
+g=diabetes_data['Outcome']#this line of code ensures that g only gives the outcome columns
+print(f)
+print(g)
+#data standardisation
+scaler = StandardScaler()
+scaler.fit(f)
+standardised_data = scaler.transform(f)
+print(standardised_data)
+f=standardised_data
+g=diabetes_data['Outcome']
+print(f)
+print(g)
+#TRAIN AND SPLIT
+f_train,f_test,g_train,g_test = train_test_split(f,g,test_size=0.3,stratify=g,random_state=2)
+#train_test_split is a function from sklearn.model_selection library which is use to split datasets for
+#the training and testing
+#f -> datasets is with all features
+#g -> datasets only the outcome 0 or 1 label
+#test_size will give us the amount of percentage of data which we are going to test
+#straitify=ensures the class diffrentiation in classificatiion problems in the train and test this prevents imbalanced splits
+#random_state will give us the same split if we run the code multiple times
+print(f.shape)#this returns the dimensions or size of the data in this case (2000,8)
+print(f_train.shape)#the dimensions or the size of the data we are gonna use for training our ml model
+print(f_test.shape)#the dimensions or the size of the data we are gonna use for testing our ml model
+print(g.shape)#the size of the output which we are gonna use
+print(g_train.shape)#the size or the dimensions of the outcome data in which we are going to use for training the ml model
+print(g_test.shape)# the size or dimensions of the outcome data in which we are going to use for testing the ml model
+#training the ml model
+classifier=svm.SVC(kernel='linear')
+#training the support vector machine classifier
+classifier.fit(f_train,g_train)
+#model evaluation
+#accuracy score on the training data
+f_train_predection=classifier.predict(f_train)
+training_data_accuracy=accuracy_score(f_train_predection,g_train)
+print('accuracy of the training data:',training_data_accuracy)
+#accuracy score on the test data
+f_test_predection=classifier.predict(f_test)
+testing_data_accuracy=accuracy_score(f_test_predection,g_test)
+print('accuracy of the testing data:',testing_data_accuracy)
+#WE HAVE TO INPUT THE VALUES
+preg = int(input("Number of Pregnancies: "))
+gluc = float(input("Glucose Level: "))
+bp = float(input("Blood Pressure: "))
+skin = float(input("Skin Thickness (in mm): "))
+insulin = float(input("Insulin Level: "))
+bmi = float(input("Body Mass Index (BMI): "))
+dpf = float(input("Diabetes Pedigree Function: "))
+age = float(input("Age (in years): "))
+#
+data = (preg, gluc, bp, skin, insulin, bmi, dpf, age)
+#this is a list but we want to make it a numpy array
+#changing this data to a numpy array
+data_as_numpy_array=np.array(data)
+#reshape the data
+#we have to reshape because of the expectations of the model will as high as dataset
+data_reshape=data_as_numpy_array.reshape(1,-1)#we are reshaping the data because the svm model only understand 2d arrays and cannot understand many duimensions if that happens accuracy will be decreased
+print(data_reshape)
+#standardise the data
+std_data=scaler.transform(data_reshape)
+print(std_data)
+
+predection = classifier.predict(std_data)
+print(predection)
+if predection==1:
+    print("The patient is diabetic")
+else :
+    print("The patient is not diabetic")
